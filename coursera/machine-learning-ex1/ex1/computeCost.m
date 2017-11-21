@@ -6,7 +6,7 @@ function J = computeCost(X, y, theta)
 % Initialize some useful values
 m = length(y); % number of training examples
 
-% You need to return the following variables correctly 
+% You need to return the following variables correctly
 J = 0;
 
 % ====================== YOUR CODE HERE ======================
@@ -14,8 +14,20 @@ J = 0;
 %               You should set J to the cost.
 
 
+% the prediction vector
+% theta = 2 x 1 --- transpose = 1 x 2
+% X = m x 2     --- transpose = 2 x m
+% H should be 1 x m
+H = transpose(theta) * transpose(X);
 
+% square difference
+% SD should be m x 1 matrix (same as y)
+SD = (transpose(H) - y) .^ 2;
 
+% total difference
+t = transpose(SD) * ones(m, 1);
+
+J = (1 / (2 * m)) * t;
 
 % =========================================================================
 
