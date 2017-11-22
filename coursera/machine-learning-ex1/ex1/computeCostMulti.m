@@ -14,16 +14,17 @@ J = 0;
 %               You should set J to the cost.
 
 
-%H = transpose(transpose(theta) * transpose(X));
+H = transpose(transpose(theta) * transpose(X));
 
 % square difference
 % SD should be m x 1 matrix (same as y)
-% SD = (transpose(H) - y) .^ 2;
+SD = (H - y) .^ 2;
 
 % total difference
-% t = transpose(SD) * ones(m, 1);
+t = transpose(SD) * ones(m, 1);
 
-t = transpose(X * theta - y) * (X * theta - y);
+% alternative solution (sorter, follow the guide)
+%t = transpose(X * theta - y) * (X * theta - y);
 
 J = (1 / (2 * m)) * t;
 
