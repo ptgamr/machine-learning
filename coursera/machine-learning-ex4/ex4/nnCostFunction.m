@@ -84,7 +84,6 @@ endfor
 %J = -1/m * (Y' * log(a3) + (1-Y)' * log(1-a3));
 
 J = 0;
-
 for c = 1:m
   Y_at_c = Y(c, :); % 1 x 10
   a3_at_c = a3(c, :); % 1 x 10
@@ -94,7 +93,6 @@ for c = 1:m
 endfor
 
 % Regularlize cost function
-
 Theta1_reg = Theta1;
 Theta1_reg(: , 1) = 0; % set all of first column to 0, as we don't regularize the bias
 
@@ -102,6 +100,10 @@ Theta2_reg = Theta2;
 Theta2_reg(: , 1) = 0;
 
 J += (lambda/(2*m)) * (sum((Theta1_reg' .^ 2)(:)) + sum((Theta2_reg' .^ 2)(:)));
+
+
+
+% Backpropagation
 
 % -------------------------------------------------------------
 
