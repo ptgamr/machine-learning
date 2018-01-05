@@ -22,10 +22,13 @@ Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
 Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
                  num_labels, (hidden_layer_size + 1));
 
+
 % Setup some useful variables
 m = size(X, 1);
-
 X = [ones(m, 1) X]; % 5000 x 401
+n = size(X, 2);
+h = hidden_layer_size;
+r = num_labels;
 
 % You need to return the following variables correctly
 J = 0;
@@ -64,9 +67,11 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-a2 = sigmoid(X * Theta1'); % m x 401 * 401 x 25 = m x 25
+z2 = X * Theta1';
+a2 = sigmoid(z2); % m x 401 * 401 x 25 = m x 25
 a2 = [ones(m, 1) a2]; % m x 26
-a3 = sigmoid(a2 * Theta2'); % m x 26 * 26 * 10 = m * 10
+z3 = a2 * Theta2';
+a3 = sigmoid(z3); % m x 26 * 26 * 10 = m * 10
 
 % convert Y to matrix of 0 & 1
 % size(Y) = m x 10
@@ -105,20 +110,36 @@ J += (lambda/(2*m)) * (sum((Theta1_reg' .^ 2)(:)) + sum((Theta2_reg' .^ 2)(:)));
 
 % Backpropagation
 
+Delta1 = zeros(h, n);
+Delta2 = zeros(r, h+1);
+
 for t = 1:m
   x = X(t, :); % 1x401
 
-  z2 = Theta1 * x'; % 25x401 * 401x1 = 25x1
+  a1 = x';
+
+  z2 = Theta1 * a1; % 25x401 * 401x1 = 25x1
   a2 = sigmoid(z2);
   a2 = [1; a2]; % 26x1
 
   z3 = Theta2 * a2; % 10x26 * 26x1 = 10x1
   a3 = sigmoid(z3); % 10x1
 
-  d3 = a3 - Y(t, :); % 10x1
-  d2 = (Theta2' * d3) .* sigmoidGradient([1;z2]); % 26x10 * 10x1 .* 26x1
+  d3 = a3 - Y(t, :)'; % 10x1
+
+  d2 = ((Theta2(:, 2:end))' * d3) .* sigmoidGradient(z2); % 25x10 * 10x1 .* 25x1
+
+  Delta1 += d2 * a1'; % 25x1 * 1x401
+  Delta2 += d3 * a2'; % 10x1 * 1x26 = 10x26
 endfor
 
+Theta1_grad = Delta1 ./ m;
+Theta2_grad = Delta2 ./ m;
+
+% Add regularization
+
+Theta1_grad += (lambda/m) * Theta1_reg;
+Theta2_grad += (lambda/m) * Theta2_reg;
 
 
 % -------------------------------------------------------------
@@ -127,6 +148,5 @@ endfor
 
 % Unroll gradients
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
-
 
 end
