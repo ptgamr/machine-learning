@@ -67,6 +67,7 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+a1 = X;
 z2 = X * Theta1';
 a2 = sigmoid(z2); % m x 401 * 401 x 25 = m x 25
 a2 = [ones(m, 1) a2]; % m x 26
@@ -75,27 +76,12 @@ a3 = sigmoid(z3); % m x 26 * 26 * 10 = m * 10
 
 % convert Y to matrix of 0 & 1
 % size(Y) = m x 10
-Y = zeros(m, num_labels);
+y_matrix =eye(num_labels)(y, :);
 
-for i = 1:m
-  y_at_i = y(i, 1);
-  Y(i, y_at_i) = 1;
-endfor
 
-% lrCostFunction
-% J = -(1/m) * (y' * log(h) + (1-y)' * log(1-h)) + (lambda / (2 * m)) * sum((theta_for_regularization' .^ 2));
+% Have to use element wise product (as matrix multiply will add unwanted term)
+J = -1/m * sum(sum((y_matrix .* log(a3) + (1 - y_matrix) .* log(1 - a3))));
 
-% 10 x m * m * 10 = 10 * 10
-%J = -1/m * (Y' * log(a3) + (1-Y)' * log(1-a3));
-
-J = 0;
-for c = 1:m
-  Y_at_c = Y(c, :); % 1 x 10
-  a3_at_c = a3(c, :); % 1 x 10
-
-  %  10 x 1 * 1 x 10 = 10 x 10
-  J += -1/m * (Y_at_c * log(a3_at_c)' + (1 - Y_at_c) * log(1-a3_at_c)');
-endfor
 
 % Regularlize cost function
 Theta1_reg = Theta1;
@@ -107,31 +93,40 @@ Theta2_reg(: , 1) = 0;
 J += (lambda/(2*m)) * (sum((Theta1_reg' .^ 2)(:)) + sum((Theta2_reg' .^ 2)(:)));
 
 
-
 % Backpropagation
+
+% --------------- FOR LOOP IMPLEMENTATION -----------
 
 Delta1 = zeros(h, n);
 Delta2 = zeros(r, h+1);
 
-for t = 1:m
-  x = X(t, :); % 1x401
+%for t = 1:m
+%  x = X(t, :); % 1x401
+%
+%  a1 = x';
+%
+%  z2 = Theta1 * a1; % 25x401 * 401x1 = 25x1
+%  a2 = sigmoid(z2);
+%  a2 = [1; a2]; % 26x1
+%
+%  z3 = Theta2 * a2; % 10x26 * 26x1 = 10x1
+%  a3 = sigmoid(z3); % 10x1
+%
+%  d3 = a3 - Y(t, :)'; % 10x1
+%
+%  d2 = ((Theta2(:, 2:end))' * d3) .* sigmoidGradient(z2); % 25x10 * 10x1 .* 25x1
+%
+%  Delta1 += d2 * a1'; % 25x1 * 1x401
+%  Delta2 += d3 * a2'; % 10x1 * 1x26 = 10x26
+%endfor
 
-  a1 = x';
+% --------------- VECTORIZED IMPLEMENTATION -----------
 
-  z2 = Theta1 * a1; % 25x401 * 401x1 = 25x1
-  a2 = sigmoid(z2);
-  a2 = [1; a2]; % 26x1
+d3 = a3 - y_matrix; % mx10
+d2 = (d3 * Theta2(:, 2:end)) .* sigmoidGradient(z2); % mx25
 
-  z3 = Theta2 * a2; % 10x26 * 26x1 = 10x1
-  a3 = sigmoid(z3); % 10x1
-
-  d3 = a3 - Y(t, :)'; % 10x1
-
-  d2 = ((Theta2(:, 2:end))' * d3) .* sigmoidGradient(z2); % 25x10 * 10x1 .* 25x1
-
-  Delta1 += d2 * a1'; % 25x1 * 1x401
-  Delta2 += d3 * a2'; % 10x1 * 1x26 = 10x26
-endfor
+Delta1 = d2' * a1; % 25xm * mx401
+Delta2 = d3' * a2; % 10xm * mx26
 
 Theta1_grad = Delta1 ./ m;
 Theta2_grad = Delta2 ./ m;
