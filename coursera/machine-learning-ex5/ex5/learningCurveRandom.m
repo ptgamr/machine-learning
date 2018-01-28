@@ -15,30 +15,22 @@ for i = 1:m
   Jtrain = zeros(50, 1);
   Jval = zeros(50, 1);
   for j = 1:50
-    M_rand  = randperm(m)
-    R_rand = randperm(r)
+    M_rand_idx  = randperm(m);
+    R_rand_idx = randperm(r);
 
-    Xrand = M_rand(1:i)
-    Xval_rand = R_rand(1:i)
+    Xrand = X(M_rand_idx(1:i), :);
+    yrand = y(M_rand_idx(1:i), :);
+    Xval_rand = Xval(R_rand_idx(1:i), :);
+    yval_rand = yval(R_rand_idx(1:i), :);
+
+    [theta] = trainLinearReg(Xrand, yrand, lambda);
+    Jtrain(j) = linearRegCostFunction(Xrand, yrand, theta, 0);
+    Jval(j) = linearRegCostFunction(Xval_rand, yval_rand, theta, 0);
   end
 
-
-  Xtrain = X(1:i, :);
-  ytrain = y(1:i);
-  [theta] = trainLinearReg(Xtrain, ytrain, 1);
-
-  [J] = linearRegCostFunction(Xtrain, ytrain, theta, 0);
-  error_train(i) = J;
-
-  [J] = linearRegCostFunction(Xval, yval, theta, 0);
-  error_val(i) = J;
+  error_train(i) = mean(Jtrain);
+  error_val(i) = mean(Jval);
 end
-
-
-
-
-
-
 
 % -------------------------------------------------------------
 
