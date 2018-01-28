@@ -218,3 +218,12 @@ end
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
+
+[min_err, best_lambda_idx] = min(error_val);
+best_lambda = lambda_vec(best_lambda_idx);
+
+[best_theta] = trainLinearReg(X_poly, y, best_lambda);
+best_theta
+Jtest = linearRegCostFunction(X_poly_test, ytest, best_theta, 0);
+
+fprintf('Q3.4 answer: %f\n', Jtest);
