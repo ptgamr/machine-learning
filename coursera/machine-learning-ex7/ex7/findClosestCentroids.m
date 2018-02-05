@@ -26,7 +26,7 @@ m = size(X, 1);
 for i = 1:m
   distances = zeros(K, 1);
   for j = 1:K
-    distances(j) = (sqrt((X(i, 1) - centroids(j,1)) ^ 2 + (X(i,2) - centroids(j,2)) ^ 2)) ^ 2;
+    distances(j) = norm(X(i, :) - centroids(j, :)) ^ 2;
   end
 
   [min_val, min_idx] = min(distances);
